@@ -1,17 +1,52 @@
-import * as React from 'react';
-import { StyleSheet } from 'react-native';
+import React, { Component } from 'react';
+import { StyleSheet, ScrollView } from 'react-native';
+import DeviceInfo from 'react-native-device-info';
 
 import EditScreenInfo from '../components/EditScreenInfo';
 import { Text, View } from '../components/Themed';
+import { firestore } from '../utils/firebase.js';
 
-export default function TabTwoScreen() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Tab Two</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="/screens/TabTwoScreen.tsx" />
-    </View>
-  );
+
+export default class TabTwoScreen extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      vocab: []
+    };
+    this.componentDidMount = this.componentDidMount.bind(this);
+  }
+
+  componentDidMount() {
+    firestore.collection("users").doc(DeviceInfo.getUniqueId()).get().then(doc => {
+      this.setState({ vocab: doc.data().vocab });
+    });
+  }
+
+  render() {
+    return (
+      <View style={styles.container}>
+        <ScrollView
+        // ref={(msgsScrollView) => {
+        //     this.msgsScrollView = msgsScrollView;
+        // }}
+        >
+          {this.state.vocab.map((m, i: number) => {
+            console.log(m);
+            return (
+              <View key={i}>
+                <Text /*style={styles.original}*/>{m.original}</Text>
+                <Text /*style={styles.translated}*/>{m.translated}</Text>
+              </View>
+            );
+
+          })}
+        </ScrollView>
+
+        <Text /*style={styles.translated}*/>{DeviceInfo.getUniqueId()}</Text>
+      </View>
+    );
+  }
 }
 
 const styles = StyleSheet.create({
@@ -29,4 +64,5 @@ const styles = StyleSheet.create({
     height: 1,
     width: '80%',
   },
+
 });
